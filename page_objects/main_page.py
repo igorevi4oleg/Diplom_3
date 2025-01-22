@@ -1,15 +1,11 @@
 from page_objects.base_page import BasePage
 from locators.for_main_page import MainPageLocators
 import allure
-import time
-
 
 class MainPage(BasePage):
     @allure.step('Кликнуть по кнопке перехода в личный кабинет в хэдере')
     def click_on_personal_account_in_header(self):
-        self.wait_visibility_of_element(MainPageLocators.button_personal_account)
-        time.sleep(1)
-        self.click_on_element(MainPageLocators.button_personal_account)
+        self.click_element_with_js(MainPageLocators.button_personal_account)
 
     @allure.step('Кликнуть по кнопке "Лента заказов" в хэдере')
     def click_header_feed_button(self):
@@ -23,7 +19,6 @@ class MainPage(BasePage):
 
     @allure.step('Проверить отображение окна о создании заказа')
     def check_displaying_of_confirmation_modal_of_order(self):
-        self.wait_visibility_of_element(MainPageLocators.confirmation_modal_of_order)
         return self.check_displaying_of_element(MainPageLocators.confirmation_modal_of_order)
 
     @allure.step('Кликнуть по ингредиенту')
@@ -57,6 +52,11 @@ class MainPage(BasePage):
     def get_count_of_ingredients(self):
         return self.get_text_on_element(MainPageLocators.count_of_ingredient)
 
+    @allure.step('Прогрузки кнопки создания заказа')
+    def check_clickable_on_button_make_order(self):
+        return self.check_displaying_of_element(MainPageLocators.button_make_order)
+
+
     @allure.step('Кликнуть на кнопку создания заказа')
     def click_on_button_make_order(self):
         self.click_on_element(MainPageLocators.button_make_order)
@@ -72,7 +72,12 @@ class MainPage(BasePage):
 
     @allure.step('Кликнуть на кнопку закрытия окна о создании заказа')
     def click_on_button_close_confirmation_modal(self):
-        time.sleep(3)
-        self.check_element_is_clickable(MainPageLocators.button_close_confirmation)
+        self.wait_visibility_of_element(MainPageLocators.button_close_confirmation)
         self.click_on_element(MainPageLocators.button_close_confirmation)
+
+
+
+
+
+
 

@@ -33,7 +33,3 @@ class FeedPageLocators:
                                              '"OrderFeed_orderListReady")]/li[contains(@class, '
                                              '"text_type_digits-default")]')
 
-    # Номер заказа в ленте — заготовка, в которую нужно подставить id искомого заказа
-    id_order_card_in_feed_with_substitutions = (By.XPATH, './/*[text()="{order_id}"]')
-
-    id_orders_in_feed = (By.XPATH, '//p[contains(@class, "text_type_digits-default")]')

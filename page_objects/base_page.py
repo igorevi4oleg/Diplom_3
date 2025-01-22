@@ -1,32 +1,54 @@
-from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 import allure
-import time
-
 
 class BasePage:
     def __init__(self, driver):
         self.driver = driver
 
-    @allure.step('Подождать прогрузки страницы')
-    def wait_for_page_load(self, timeout=3):
-        time.sleep(timeout)
+    @allure.step('Подождать, пока элемент станет видимым')
+    def wait_visibility_of_element(self, locator, timeout=10):
 
-    @allure.step('Подождать прогрузки элемента')
-    def wait_visibility_of_element(self, locator):
-        WebDriverWait(self.driver, 10).until(expected_conditions.visibility_of_element_located(locator))
+        return WebDriverWait(self.driver, timeout).until(
+            EC.visibility_of_element_located(locator),
+            message=f"Элемент {locator} не стал видимым за {timeout} секунд."
+        )
 
     @allure.step('Найти элемент на странице')
-    def find_element_with_wait(self, locator):
-        self.wait_visibility_of_element(locator)
+    def find_element_with_wait(self, locator, timeout=10):
+
+        self.wait_visibility_of_element(locator, timeout)
         return self.driver.find_element(*locator)
 
     @allure.step('Кликнуть на элемент')
-    def click_on_element(self, locator):
-        target = self.check_element_is_clickable(locator)
-        click = ActionChains(self.driver)
-        click.move_to_element(target).click().perform()
+    def click_on_element(self, locator, timeout=10):
+        try:
+            element = WebDriverWait(self.driver, timeout).until(
+                EC.element_to_be_clickable(locator),
+                message=f"Элемент {locator} не стал кликабельным в течение {timeout} секунд."
+            )
+            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+            ActionChains(self.driver).move_to_element(element).click().perform()
+
+        except Exception as e:
+            allure.attach(self.driver.get_screenshot_as_png(), name="error_screenshot",
+                          attachment_type=allure.attachment_type.PNG)
+            raise Exception(f"Ошибка при клике на элемент {locator}: {e}")
+
+    @allure.step('Кликнуть на элемент через JavaScript')
+    def click_element_with_js(self, locator, timeout=10):
+        try:
+            element = WebDriverWait(self.driver, timeout).until(
+                EC.presence_of_element_located(locator),
+                message=f"Элемент {locator} не найден за {timeout} секунд."
+            )
+            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+            self.driver.execute_script("arguments[0].click();", element)
+        except Exception as e:
+            allure.attach(self.driver.get_screenshot_as_png(), name="error_screenshot_js",
+                          attachment_type=allure.attachment_type.PNG)
+            raise Exception(f"Ошибка при клике на элемент через JS {locator}: {e}")
 
     @allure.step('Ввести значение в поле ввода')
     def send_keys_to_input(self, locator, keys):
@@ -38,26 +60,38 @@ class BasePage:
         self.wait_visibility_of_element(locator)
         return self.driver.find_element(*locator).text
 
+
     @allure.step('Проверить отображение элемента')
     def check_displaying_of_element(self, locator):
         return self.driver.find_element(*locator).is_displayed()
 
     @allure.step('Подождать, пока элемент закроется')
     def wait_for_closing_of_element(self, locator):
-        WebDriverWait(self.driver, 15).until_not(expected_conditions.visibility_of_element_located(locator))
+        WebDriverWait(self.driver, 5).until_not(EC.visibility_of_element_located(locator))
 
     @allure.step('Проверить кликабельность элемента')
-    def check_element_is_clickable(self, locator):
-        return WebDriverWait(self.driver, 15).until(expected_conditions.element_to_be_clickable(locator))
+    def check_element_is_clickable(self, locator, timeout=10):
+        WebDriverWait(self.driver, timeout).until(
+            EC.element_to_be_clickable(locator),
+            message=f"Элемент {locator} не стал кликабельным в течение {timeout} секунд."
+        )
 
     @allure.step('Подождать смену текста на элементе')
     def wait_for_element_to_change_text(self, locator, value):
-        return WebDriverWait(self.driver, 10).until_not(expected_conditions.
+        return WebDriverWait(self.driver, 10).until_not(EC.
                                                         text_to_be_present_in_element(locator, value))
 
-    @allure.step('получить адрес текущей страницы')
+
+    @allure.step('Вернуть адрес текущей страницы')
     def get_current_url(self):
-        time.sleep(1)
+        return self.driver.current_url
+
+
+    @allure.step('получить адрес текущей страницы с ожиданием')
+    def get_current_url_with_wait(self, timeout=10):
+        WebDriverWait(self.driver, timeout).until(
+            EC.url_changes(self.driver.current_url)
+        )
         return self.driver.current_url
 
     @allure.step('Перетаскивание ингридиента')
