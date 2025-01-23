@@ -26,6 +26,22 @@ class MainPage(BasePage):
         self.wait_visibility_of_element(MainPageLocators.ingredient_1)
         self.click_on_element(MainPageLocators.ingredient_1)
 
+
+
+
+
+
+
+    @allure.step('Проверить отображение кнопки как активной')
+    def check_displaying_of_selected_button(self):
+        self.find_element_with_wait(MainPageLocators.selected_button)
+
+
+
+
+
+
+
     @allure.step('Проверить отображение окна "Детали ингредиента"')
     def check_displaying_of_modal_details(self):
         self.wait_visibility_of_element(MainPageLocators.header_of_modal_details)

@@ -4,9 +4,6 @@ from urls import Urls
 from page_objects.main_page import MainPage
 from page_objects.feed_page import FeedPage
 from page_objects.account_page import AccountPage
-from locators.for_main_page import MainPageLocators
-from locators.for_feed_page import FeedPageLocators
-
 
 
 @pytest.mark.usefixtures("driver")
@@ -15,15 +12,14 @@ class TestMainFunctionality:
     def test_click_on_constructor(self, driver):
         main_page = MainPage(driver)
         main_page.click_on_button_constructor()
-        assert main_page.find_element_with_wait(MainPageLocators.selected_button), "Элемент не найден"
+        assert main_page.check_displaying_of_selected_button, "Элемент не найден"
 
     @allure.title("Переход по клику на 'Лента заказов'")
     def test_click_on_feed(self, driver):
         main_page = MainPage(driver)
         main_page.click_header_feed_button()
         feed_page = FeedPage(driver)
-        assert feed_page.find_element_with_wait(FeedPageLocators.section_orders_list), "Элемент не найден"
-
+        assert feed_page.check_displaying_section_order_list, "Элемент не найден"
 
     @allure.title("Получение деталей об ингридиенте")
     def test_get_ingridient_details(self, driver):

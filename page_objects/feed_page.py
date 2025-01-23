@@ -50,3 +50,8 @@ class FeedPage(BasePage):
         order_locator = (By.XPATH, f'//p[@class="text text_type_digits-default" and text()="#{order_id}"]')
         return self.check_displaying_of_element(order_locator)
 
+    @allure.step('Проверить отображение ленты заказов')
+    def check_displaying_section_order_list(self):
+        self.find_element_with_wait(FeedPageLocators.section_orders_list)
+
+
